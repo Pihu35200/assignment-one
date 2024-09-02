@@ -19,7 +19,8 @@ jobs:
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        # No AWS credentials or region are required here.
+        with:
+          aws-region: us-east-2  # Specify the AWS region here
 
       - name: Build and Push Docker image
         id: build-image
