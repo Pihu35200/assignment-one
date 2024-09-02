@@ -5,6 +5,14 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION: us-east-2                 
+  ECR_REPOSITORY: assignment-one        
+  ECS_SERVICE: your-ecs-service           
+  ECS_CLUSTER: your-ecs-cluster                 
+  ECS_TASK_DEFINITION: ecs-task-definition.json
+  CONTAINER_NAME: reactapp
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,14 +27,12 @@ jobs:
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        with:
-          aws-region: us-east-2  # Specify the AWS region here
 
       - name: Build and Push Docker image
         id: build-image
         run: |
-          docker build -t ${{ secrets.ECR_REGISTRY }}/assignment-one:latest .
-          docker push ${{ secrets.ECR_REGISTRY }}/assignment-one:latest
+          docker build -t ${{ secrets.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest .
+          docker push ${{ secrets.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -38,10 +44,10 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-          task-definition: ecs-task-definition.json
-          service: your-ecs-service
-          cluster: your-ecs-cluster
+          aws-region: ${{ env.AWS_REGION }}
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
       - name: Run Integration Tests
@@ -60,8 +66,8 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-          task-definition: ecs-task-definition.json
-          service: your-ecs-service
-          cluster: your-ecs-cluster
+          aws-region: ${{ env.AWS_REGION }}
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
